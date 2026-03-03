@@ -1,14 +1,15 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace PlanA_Assets.Scripts
 {
     public class ManageScoreAndMoves: MonoBehaviour
     {
-        [SerializeField] private HudController _hudController;
-        [SerializeField] private TMPro.TextMeshProUGUI scoreValue;
-        [SerializeField] private TMPro.TextMeshProUGUI movesValue;
-
+        // Added events to separate logic from view
+        public UnityAction OnGameOver;
+        public UnityAction<int, int> OnScoreChange;
+        
         private int _movesAmount = 5;
         private int _scoreAmount;
 
@@ -17,38 +18,25 @@ namespace PlanA_Assets.Scripts
             ResetValues();
         }
 
-        private void ResetValues()
+        public void ResetValues()
         {
             _movesAmount = 5;
             _scoreAmount = 0;
-            UpdateUi();
+            
+            OnScoreChange?.Invoke(_scoreAmount, _movesAmount);
         }
 
-        private void UpdateUi()
-        {
-            scoreValue.SetText(_scoreAmount.ToString());
-            movesValue.SetText(_movesAmount.ToString());
-        }
-
-        public void Replay()
+        private void Replay()
         {
             ResetValues();
-            UpdateUi();
+            OnScoreChange?.Invoke(_scoreAmount, _movesAmount);
         }
         
+        // Wrapped to avoid misleading into build
 #if UNITY_EDITOR
         public void Test_MakeMoveOnClick()
         {
-            _movesAmount--;
-            _scoreAmount += 10;
-            
-            UpdateUi();
-            
-            if (_movesAmount <= 0)
-            {
-                _hudController.HandleGameOver();
-            }
-
+            HandleScoreAndMoves(scoreToAdd: 10);
         }
 
         public void Test_ReplayOnClick()
@@ -56,5 +44,21 @@ namespace PlanA_Assets.Scripts
             Replay();
         }
 #endif
+        public void HandleScoreAndMoves(int scoreToAdd = 1, bool shouldHandleMoves = true)
+        {
+            if(shouldHandleMoves)
+            {
+                _movesAmount--;
+            }
+            
+            _scoreAmount += scoreToAdd;
+            
+            OnScoreChange?.Invoke(_scoreAmount, _movesAmount);
+            
+            if (_movesAmount <= 0)
+            {
+                OnGameOver?.Invoke();
+            }
+        }
     }
 }
