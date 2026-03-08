@@ -1,4 +1,5 @@
 using System;
+using PlanA_Assets.Scripts.Tests.Example;
 using UnityEngine;
 
 namespace PlanA_Assets.Scripts
@@ -22,10 +23,22 @@ namespace PlanA_Assets.Scripts
     /// </summary>
     public class Player: MonoBehaviour
     {
+        // Need a way to direct reference for tests
+        // Interfaces doesn't provide that
+        [SerializeField] private MonoBehaviour weaponBehaviour;
+        [SerializeField] private MonoBehaviour targetBehaviour;
+        
         // It could be any weapon
-        private Weapon _weapon;
+        private IWeapon _weapon;
         // It could be any target enemy
         private IDamageable _target;
+
+        private void Awake()
+        {
+            // We can cast them to our internal interfaces
+            _weapon = weaponBehaviour as IWeapon;
+            _target = targetBehaviour as IDamageable;
+        }
 
         private void Update()
         {
@@ -38,12 +51,17 @@ namespace PlanA_Assets.Scripts
 
     public class Weapon : MonoBehaviour, IWeapon
     {
+        // Separate data from logic: Logic decides what happens, data decides the values
+        // Data becomes flexible
+        // Designers can tune without code changes
+        [SerializeField] private WeaponConfig _weaponConfig;
+        
         // MonoBehaviours owns logic, though it's outside it
         private WeaponLogic _weaponLogic;
 
         private void Awake()
         {
-            _weaponLogic = new WeaponLogic(10);
+            _weaponLogic = new WeaponLogic(_weaponConfig);
         }
 
         public void Fire(IDamageable target)
@@ -60,16 +78,16 @@ namespace PlanA_Assets.Scripts
     /// </summary>
     public class WeaponLogic
     {
-        private readonly int _damage;
+        private readonly WeaponConfig _weaponConfig;
 
-        public WeaponLogic(int damage)
+        public WeaponLogic(WeaponConfig weaponConfig)
         {
-            _damage = damage;
+            _weaponConfig = weaponConfig;
         }
 
         public void Fire(IDamageable target)
         {
-            target.TakeDamage(_damage);
+            target.TakeDamage(_weaponConfig.Damage);
         }
     }
 
