@@ -2,37 +2,50 @@ using UnityEngine;
 
 namespace PlanA_Assets.Scripts
 {
+    public interface IDamageable
+    {
+        void TakeDamage(int damage);
+    }
+
+    public interface IWeapon
+    {
+        void Fire(IDamageable target);
+    }
+    
     /// <summary>
-    /// Typical Unity code: tightly coupled, makes test super hard
-    /// It's ok early on, but becomes hard at scale
+    /// Evolved to use Interfaces instead of concrete monoBehaviours, brings decoupling
+    /// Classes should rely on behavior, not concrete
+    /// Easy to modify, extend (doesn't require re-wiring)
+    /// Easy to test
+    /// Adds reusability
     /// </summary>
     public class Player: MonoBehaviour
     {
-        // direct reference to concrete classes
-        public Weapon weapon;
+        // It could be any weapon
+        private Weapon _weapon;
+        // It could be any target enemy
+        private IDamageable _target;
 
         private void Update()
         {
             if (Input.GetButtonDown("Fire1"))
             {
-                weapon.Fire();
+                _weapon.Fire(_target);
             }
         }
     }
 
-    public class Weapon : MonoBehaviour
+    public class Weapon : MonoBehaviour, IWeapon
     {
-        public int damage = 10;
-        // direct reference
-        public Enemy enemy;
+        private int _damage = 10;
 
-        public void Fire()
+        public void Fire(IDamageable target)
         {
-            enemy.TakeDamage(damage);
+            target.TakeDamage(_damage);
         }
     }
 
-    public class Enemy : MonoBehaviour
+    public class Enemy : MonoBehaviour, IDamageable
     {
         private int _health;
         
