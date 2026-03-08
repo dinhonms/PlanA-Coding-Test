@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace PlanA_Assets.Scripts
@@ -37,7 +38,34 @@ namespace PlanA_Assets.Scripts
 
     public class Weapon : MonoBehaviour, IWeapon
     {
-        private int _damage = 10;
+        // MonoBehaviours owns logic, though it's outside it
+        private WeaponLogic _weaponLogic;
+
+        private void Awake()
+        {
+            _weaponLogic = new WeaponLogic(10);
+        }
+
+        public void Fire(IDamageable target)
+        {
+            _weaponLogic.Fire(target);
+        }
+    }
+
+    /// <summary>
+    /// Separate MonoBehaviour from logic. This class knows nothing about Unity objects (physics, transforms, go, etc)
+    /// Adds behaviour without Unity
+    /// Logic easier to test
+    /// Separation of concerns (monobehaviour owns lifecycle not logic)
+    /// </summary>
+    public class WeaponLogic
+    {
+        private readonly int _damage;
+
+        public WeaponLogic(int damage)
+        {
+            _damage = damage;
+        }
 
         public void Fire(IDamageable target)
         {

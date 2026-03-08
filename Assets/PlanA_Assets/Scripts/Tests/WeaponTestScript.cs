@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using UnityEngine;
 
 namespace PlanA_Assets.Scripts.Tests
 {
@@ -19,9 +18,7 @@ namespace PlanA_Assets.Scripts.Tests
         public void Fire_DealsDamageToTarget()
         {
             // Arrange (prepare test conditions)
-            var go = new GameObject();
-            var weapon = go.AddComponent<Weapon>();
-            
+            var weapon = new WeaponLogic(10); // Tests are now dependent on logic not concrete objects
             var target = new FakeDamageable();
             
             // Act (run code logic)
