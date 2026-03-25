@@ -1,5 +1,5 @@
-using System;
 using System.Threading.Tasks;
+using PlanA_Assets.Scripts.Core;
 using UnityEngine;
 
 namespace PlanA_Assets.Scripts
@@ -7,7 +7,6 @@ namespace PlanA_Assets.Scripts
     public class HudController: MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private ManageScoreAndMoves manageScoreAndMoves;
         [SerializeField] private SpriteFactory spriteFactory;
         [SerializeField] private Canvas gameOverCanvas;
         [SerializeField] private Canvas transientCanvas;
@@ -19,6 +18,8 @@ namespace PlanA_Assets.Scripts
         [SerializeField] private TMPro.TextMeshProUGUI gameOverScoreValue;
         [SerializeField] private TMPro.TextMeshProUGUI movesValue;
 
+        private IManageScoreAndMoves _manageScoreAndMoves;
+        
         private void Start()
         {
             InitializeGame();
@@ -36,12 +37,11 @@ namespace PlanA_Assets.Scripts
 
         private void InitializeGame()
         {
-            manageScoreAndMoves.OnGameOver = null;
-            manageScoreAndMoves.OnGameOver += OnGameOver;
-            manageScoreAndMoves.OnScoreChange += OnScoreChange;
+            _manageScoreAndMoves.OnGameOver += OnGameOver;
+            _manageScoreAndMoves.OnScoreChange += OnScoreChange;
             
             gameOverCanvas.enabled = false;
-            manageScoreAndMoves.ResetValues();
+            
             InitializeBlockColors();
         }
 
@@ -52,8 +52,9 @@ namespace PlanA_Assets.Scripts
 
         private void DeInitializeGame()
         {
-            manageScoreAndMoves.OnGameOver -= OnGameOver;
-            manageScoreAndMoves.OnScoreChange -= OnScoreChange;
+            _manageScoreAndMoves.OnGameOver -= OnGameOver;
+            _manageScoreAndMoves.OnScoreChange -= OnScoreChange;
+            _manageScoreAndMoves = null;
         }
 
         /// <summary>
@@ -71,7 +72,7 @@ namespace PlanA_Assets.Scripts
 
         public void AddScore(bool shouldHandleMoves = true)
         {
-            manageScoreAndMoves.HandleScoreAndMoves(shouldHandleMoves: shouldHandleMoves);
+            _manageScoreAndMoves.HandleScoreAndMoves(shouldHandleMoves: shouldHandleMoves);
         }
 
         private void OnScoreChange(int scoreAmount, int movesAmount)
@@ -100,7 +101,7 @@ namespace PlanA_Assets.Scripts
             transientCanvas.enabled = false;
         }
 
-        /// <summary>
+        /// <summary>r
         /// We surely don't need to iterate over all blocks, for sure something to improve
         /// </summary>
         private void RespawnCollectedBlocks()
@@ -114,6 +115,11 @@ namespace PlanA_Assets.Scripts
                         .SetEnabled();
                 }
             }
+        }
+
+        public void InjectResolver(ObjectResolver objectResolver)
+        {
+            _manageScoreAndMoves = objectResolver.Resolve<IManageScoreAndMoves>();
         }
     }
 }

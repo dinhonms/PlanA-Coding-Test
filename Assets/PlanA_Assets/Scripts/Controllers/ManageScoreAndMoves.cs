@@ -1,4 +1,5 @@
 using System;
+using PlanA_Assets.Scripts.Core;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -26,12 +27,6 @@ namespace PlanA_Assets.Scripts
             OnScoreChange?.Invoke(_scoreAmount, _movesAmount);
         }
 
-        private void Replay()
-        {
-            ResetValues();
-            OnScoreChange?.Invoke(_scoreAmount, _movesAmount);
-        }
-        
         // Wrapped to avoid misleading into build
 #if UNITY_EDITOR
         public void Test_MakeMoveOnClick()
@@ -41,7 +36,8 @@ namespace PlanA_Assets.Scripts
 
         public void Test_ReplayOnClick()
         {
-            Replay();
+            ResetValues();
+            OnScoreChange?.Invoke(_scoreAmount, _movesAmount);
         }
 #endif
         public void HandleScoreAndMoves(int scoreToAdd = 1, bool shouldHandleMoves = true)
